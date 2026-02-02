@@ -1,0 +1,40 @@
+{% extends "sas/base.html" %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">Finansijsko stanje</h1>
+<div class="bg-white p-6 shadow rounded">
+  <h2 class="text-xl font-semibold mb-4">Pregled zaduženja i uplata</h2>
+  <div class="grid md:grid-cols-2 gap-6">
+    <div>
+      <h3 class="font-semibold mb-2">Zaduženja</h3>
+      <ul class="list-disc list-inside">
+        {% for zad in zaduzenja %}
+          <li>{{ zad.datum }} – {{ zad.get_tip_display }}: <span class="text-red-600">{{ zad.iznos }} KM</span></li>
+        {% empty %}
+          <li>Nema zaduženja.</li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div>
+      <h3 class="font-semibold mb-2">Uplate</h3>
+      <ul class="list-disc list-inside">
+        {% for upl in uplate %}
+          <li>{{ upl.datum }} – {{ upl.svrha|default:"Uplata" }}: <span class="text-green-600">{{ upl.iznos }} KM</span></li>
+        {% empty %}
+          <li>Nije evidentirana nijedna uplata.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="mt-4 p-4 bg-gray-100 border-t">
+    <strong>Trenutni saldo: 
+      {% if saldo < 0 %}
+        <span class="text-red-600">{{ saldo }} KM (dugovanje)</span>
+      {% elif saldo > 0 %}
+        <span class="text-green-600">{{ saldo }} KM (pretplata)</span>
+      {% else %}
+        0 KM
+      {% endif %}
+    </strong>
+  </div>
+</div>
+{% endblock %}

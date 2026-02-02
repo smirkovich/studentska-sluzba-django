@@ -1,0 +1,41 @@
+{% load static %}
+<!doctype html>
+<html lang="sr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAS aplikacija</title>
+  <link href="{% static 'sas/css/output.css' %}" rel="stylesheet">
+</head>
+<body class="bg-gray-100 text-gray-900">
+  <!-- Navigacija -->
+  <nav class="bg-blue-800 text-white p-4">
+    <div class="container mx-auto flex justify-between">
+      <span class="font-semibold">Studentska služba</span>
+      {% if user.is_authenticated %}
+      <div>
+        <a href="{% url 'ispiti_list' %}" class="mr-4 hover:underline">Ispiti</a>
+        <a href="{% url 'finansije' %}" class="mr-4 hover:underline">Finansije</a>
+        <form method="post" action="{% url 'logout' %}" class="inline">
+  {% csrf_token %}
+  <button type="submit" class="hover:underline">Odjava</button>
+</form>
+      </div>
+      {% else %}
+      <a href="{% url 'login' %}" class="hover:underline">Prijava na sistem</a>
+      {% endif %}
+    </div>
+  </nav>
+
+  <div class="container mx-auto my-8">
+    {% if messages %}
+      {% for message in messages %}
+        <div class="mb-4 p-4 border {{ message.tags }} ">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+    {% block content %}{% endblock %}
+  </div>
+</body>
+</html>

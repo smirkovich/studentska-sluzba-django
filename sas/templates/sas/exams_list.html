@@ -1,0 +1,66 @@
+{% extends "sas/base.html" %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">Prijava ispita</h1>
+<div class="grid md:grid-cols-2 gap-8">
+  <!-- Lista dostupnih ispita za prijavu -->
+  <div>
+    <h2 class="text-xl font-semibold mb-3">Dostupni ispiti</h2>
+    {% if dostupni_termini %}
+      <table class="min-w-full bg-white shadow rounded overflow-hidden">
+        <thead class="bg-gray-200">
+          <tr>
+            <th class="text-left px-4 py-2">Predmet</th>
+            <th class="text-left px-4 py-2">Datum i vrijeme</th>
+            <th class="px-4 py-2"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for termin in dostupni_termini %}
+          <tr class="border-b">
+            <td class="px-4 py-2">{{ termin.predmet.naziv }}</td>
+            <td class="px-4 py-2">{{ termin.datum_vrijeme|date:"d.m.Y. H:i" }}</td>
+            <td class="px-4 py-2 text-right">
+              <a href="{% url 'prijava_ispita' termin.id %}" class="text-blue-600 hover:underline">Prijavi</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>Nema ispita za prijavu.</p>
+    {% endif %}
+  </div>
+  <!-- Lista već prijavljenih ispita -->
+  <div>
+    <h2 class="text-xl font-semibold mb-3">Prijavljeni ispiti</h2>
+    {% if prijavljeni_termini %}
+      <table class="min-w-full bg-white shadow rounded overflow-hidden">
+        <thead class="bg-gray-200">
+          <tr>
+            <th class="text-left px-4 py-2">Predmet</th>
+            <th class="text-left px-4 py-2">Datum i vrijeme</th>
+            <th class="px-4 py-2">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for prijava in prijavljeni_termini %}
+          <tr class="border-b">
+            <td class="px-4 py-2">{{ prijava.termin.predmet.naziv }}</td>
+            <td class="px-4 py-2">{{ prijava.termin.datum_vrijeme|date:"d.m.Y. H:i" }}</td>
+            <td class="px-4 py-2">
+              {% if prijava.status == 'prijavljen' %}
+                <a href="{% url 'odjava_ispita' prijava.termin.id %}" class="text-red-600 hover:underline">Odjavi</a>
+              {% else %}
+                Odjavljen
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>Trenutno nema prijavljenih ispita.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
