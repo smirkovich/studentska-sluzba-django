@@ -8,7 +8,7 @@
       <h3 class="font-semibold mb-2">Zaduženja</h3>
       <ul class="list-disc list-inside">
         {% for zad in zaduzenja %}
-          <li>{{ zad.datum }} – {{ zad.get_tip_display }}: <span class="text-red-600">{{ zad.iznos }} KM</span></li>
+          <li>{{ zad.datum }} – {{ zad.opis|default:"" }}: <span class="text-red-600">{{ zad.iznos }} KM</span></li>
         {% empty %}
           <li>Nema zaduženja.</li>
         {% endfor %}

@@ -1,66 +1,376 @@
 {% extends "sas/base.html" %}
 {% block content %}
+
+<style>
+  /* ===== DIALOG STILOVI ===== */
+  dialog {
+    width: 100%;
+    max-width: 480px;
+    padding: 0;
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+    overflow: hidden;
+    margin: auto;
+  }
+
+  dialog::backdrop {
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(3px);
+  }
+
+  dialog[open] {
+    animation: dialogIn 0.22s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+
+  @keyframes dialogIn {
+    from { opacity: 0; transform: translateY(-16px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .dlg-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+  }
+  .dlg-header-blue { background: #2563eb; }
+  .dlg-header-red  { background: #dc2626; }
+
+  .dlg-header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .dlg-header svg {
+    width: 1.2rem;
+    height: 1.2rem;
+    flex-shrink: 0;
+  }
+
+  .dlg-close {
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.75);
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 0.25rem;
+    transition: color 0.15s;
+  }
+  .dlg-close:hover { color: white; }
+
+  .dlg-body {
+    padding: 1.5rem;
+    background: white;
+  }
+
+  .dlg-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: 0.9rem;
+  }
+  .dlg-row:last-of-type { border-bottom: none; }
+
+  .dlg-label {
+    color: #9ca3af;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    min-width: 8rem;
+    padding-top: 2px;
+    flex-shrink: 0;
+  }
+
+  .dlg-value {
+    color: #111827;
+    font-weight: 500;
+  }
+
+  .dlg-notice {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+    margin: 1.25rem 0 1.5rem;
+  }
+  .dlg-notice svg {
+    width: 1.1rem;
+    height: 1.1rem;
+    flex-shrink: 0;
+  }
+  .dlg-notice-amber {
+    background: #fffbeb;
+    border: 1px solid #fcd34d;
+    color: #92400e;
+  }
+  .dlg-notice-green {
+    background: #f0fdf4;
+    border: 1px solid #86efac;
+    color: #166534;
+  }
+
+  .dlg-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 0.25rem;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.55rem 1.25rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    border: none;
+    transition: background 0.15s, box-shadow 0.15s;
+    line-height: 1.4;
+  }
+  .btn svg {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+  }
+  .btn-cancel {
+    background: white;
+    color: #374151;
+    border: 1.5px solid #d1d5db;
+  }
+  .btn-cancel:hover {
+    background: #f9fafb;
+    border-color: #9ca3af;
+  }
+  .btn-confirm-blue {
+    background: #2563eb;
+    color: white;
+    box-shadow: 0 2px 6px rgba(37,99,235,0.35);
+  }
+  .btn-confirm-blue:hover {
+    background: #1d4ed8;
+    box-shadow: 0 4px 12px rgba(37,99,235,0.4);
+  }
+  .btn-confirm-red {
+    background: #dc2626;
+    color: white;
+    box-shadow: 0 2px 6px rgba(220,38,38,0.35);
+  }
+  .btn-confirm-red:hover {
+    background: #b91c1c;
+    box-shadow: 0 4px 12px rgba(220,38,38,0.4);
+  }
+</style>
+
+<!-- ===== DIALOG ZA PRIJAVU ===== -->
+<dialog id="dlg-prijava">
+  <div class="dlg-header dlg-header-blue">
+    <div class="dlg-header-left">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      Prijava ispita
+    </div>
+    <button class="dlg-close" onclick="document.getElementById('dlg-prijava').close()">&times;</button>
+  </div>
+  <div class="dlg-body">
+    <div>
+      <div class="dlg-row"><span class="dlg-label">Predmet</span><span class="dlg-value" id="p-naziv"></span></div>
+      <div class="dlg-row"><span class="dlg-label">Godina studija</span><span class="dlg-value"><span id="p-godina"></span>. godina</span></div>
+      <div class="dlg-row"><span class="dlg-label">Datum i vrijeme</span><span class="dlg-value" id="p-datum"></span></div>
+      <div class="dlg-row"><span class="dlg-label">Mjesto</span><span class="dlg-value" id="p-mjesto"></span></div>
+    </div>
+    <div class="dlg-notice dlg-notice-amber">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126z"/>
+      </svg>
+      Prijavom će Vam biti naplaćena naknada od <strong style="margin-left:4px">20,00 KM</strong>.
+    </div>
+    <div class="dlg-actions">
+      <button class="btn btn-cancel" onclick="document.getElementById('dlg-prijava').close()">Odustani</button>
+      <a id="p-link" href="#" class="btn btn-confirm-blue">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
+        </svg>
+        Potvrdi prijavu
+      </a>
+    </div>
+  </div>
+</dialog>
+
+<!-- ===== DIALOG ZA ODJAVU ===== -->
+<dialog id="dlg-odjava">
+  <div class="dlg-header dlg-header-red">
+    <div class="dlg-header-left">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      Odjava ispita
+    </div>
+    <button class="dlg-close" onclick="document.getElementById('dlg-odjava').close()">&times;</button>
+  </div>
+  <div class="dlg-body">
+    <div>
+      <div class="dlg-row"><span class="dlg-label">Predmet</span><span class="dlg-value" id="o-naziv"></span></div>
+      <div class="dlg-row"><span class="dlg-label">Godina studija</span><span class="dlg-value"><span id="o-godina"></span>. godina</span></div>
+      <div class="dlg-row"><span class="dlg-label">Datum i vrijeme</span><span class="dlg-value" id="o-datum"></span></div>
+      <div class="dlg-row"><span class="dlg-label">Mjesto</span><span class="dlg-value" id="o-mjesto"></span></div>
+    </div>
+    <div class="dlg-notice dlg-notice-green">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"/>
+      </svg>
+      Odjavom će naknada od <strong style="margin: 0 4px">20,00 KM</strong> biti stornirana.
+    </div>
+    <div class="dlg-actions">
+      <button class="btn btn-cancel" onclick="document.getElementById('dlg-odjava').close()">Odustani</button>
+      <a id="o-link" href="#" class="btn btn-confirm-red">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+        Potvrdi odjavu
+      </a>
+    </div>
+  </div>
+</dialog>
+
 <h1 class="text-2xl font-bold mb-6">Prijava ispita</h1>
+
 <div class="grid md:grid-cols-2 gap-8">
-  <!-- Lista dostupnih ispita za prijavu -->
+
+  <!-- ===== DOSTUPNI ISPITI ===== -->
   <div>
     <h2 class="text-xl font-semibold mb-3">Dostupni ispiti</h2>
     {% if dostupni_termini %}
-      <table class="min-w-full bg-white shadow rounded overflow-hidden">
-        <thead class="bg-gray-200">
-          <tr>
-            <th class="text-left px-4 py-2">Predmet</th>
-            <th class="text-left px-4 py-2">Datum i vrijeme</th>
-            <th class="px-4 py-2"></th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for termin in dostupni_termini %}
-          <tr class="border-b">
-            <td class="px-4 py-2">{{ termin.predmet.naziv }}</td>
-            <td class="px-4 py-2">{{ termin.datum_vrijeme|date:"d.m.Y. H:i" }}</td>
-            <td class="px-4 py-2 text-right">
-              <a href="{% url 'prijava_ispita' termin.id %}" class="text-blue-600 hover:underline">Prijavi</a>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+      <div class="overflow-x-auto">
+        <table class="min-w-full bg-white shadow rounded overflow-hidden">
+          <thead class="bg-gray-200">
+            <tr>
+              <th class="text-left px-4 py-2">Predmet</th>
+              <th class="text-left px-4 py-2">God.</th>
+              <th class="text-left px-4 py-2">Datum i vrijeme</th>
+              <th class="text-left px-4 py-2">Mjesto</th>
+              <th class="px-4 py-2"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for termin in dostupni_termini %}
+            <tr class="border-b hover:bg-gray-50">
+              <td class="px-4 py-2">{{ termin.predmet.naziv }}</td>
+              <td class="px-4 py-2 text-center">{{ termin.predmet.godina_studija }}</td>
+              <td class="px-4 py-2 whitespace-nowrap">{{ termin.datum_vrijeme|date:"d.m.Y. H:i" }}</td>
+              <td class="px-4 py-2 text-gray-500 text-sm">{{ termin.mjesto_izvodjenja|default:"—" }}</td>
+              <td class="px-4 py-2 text-right">
+                <button
+                  onclick="otvoriPrijavu(
+                    '{% url 'prijava_ispita' termin.id %}',
+                    '{{ termin.predmet.naziv|escapejs }}',
+                    '{{ termin.predmet.godina_studija }}',
+                    '{{ termin.datum_vrijeme|date:"d.m.Y. H:i" }}',
+                    '{{ termin.mjesto_izvodjenja|default:"Nije navedeno"|escapejs }}'
+                  )"
+                  class="text-blue-600 hover:underline">Prijavi</button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     {% else %}
-      <p>Nema ispita za prijavu.</p>
+      <p class="text-gray-500">Nema ispita za prijavu.</p>
     {% endif %}
   </div>
-  <!-- Lista već prijavljenih ispita -->
+
+  <!-- ===== PRIJAVLJENI ISPITI (samo budući) ===== -->
   <div>
     <h2 class="text-xl font-semibold mb-3">Prijavljeni ispiti</h2>
     {% if prijavljeni_termini %}
-      <table class="min-w-full bg-white shadow rounded overflow-hidden">
-        <thead class="bg-gray-200">
-          <tr>
-            <th class="text-left px-4 py-2">Predmet</th>
-            <th class="text-left px-4 py-2">Datum i vrijeme</th>
-            <th class="px-4 py-2">Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for prijava in prijavljeni_termini %}
-          <tr class="border-b">
-            <td class="px-4 py-2">{{ prijava.termin.predmet.naziv }}</td>
-            <td class="px-4 py-2">{{ prijava.termin.datum_vrijeme|date:"d.m.Y. H:i" }}</td>
-            <td class="px-4 py-2">
-              {% if prijava.status == 'prijavljen' %}
-                <a href="{% url 'odjava_ispita' prijava.termin.id %}" class="text-red-600 hover:underline">Odjavi</a>
-              {% else %}
-                Odjavljen
-              {% endif %}
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+      <div class="overflow-x-auto">
+        <table class="min-w-full bg-white shadow rounded overflow-hidden">
+          <thead class="bg-gray-200">
+            <tr>
+              <th class="text-left px-4 py-2">Predmet</th>
+              <th class="text-left px-4 py-2">God.</th>
+              <th class="text-left px-4 py-2">Datum i vrijeme</th>
+              <th class="text-left px-4 py-2">Mjesto</th>
+              <th class="px-4 py-2">Akcija</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for prijava in prijavljeni_termini %}
+            <tr class="border-b hover:bg-gray-50">
+              <td class="px-4 py-2">{{ prijava.termin.predmet.naziv }}</td>
+              <td class="px-4 py-2 text-center">{{ prijava.termin.predmet.godina_studija }}</td>
+              <td class="px-4 py-2 whitespace-nowrap">{{ prijava.termin.datum_vrijeme|date:"d.m.Y. H:i" }}</td>
+              <td class="px-4 py-2 text-gray-500 text-sm">{{ prijava.termin.mjesto_izvodjenja|default:"—" }}</td>
+              <td class="px-4 py-2 text-center">
+                {% if prijava.status == 'prijavljen' %}
+                  <button
+                    onclick="otvoriOdjavu(
+                      '{% url 'odjava_ispita' prijava.termin.id %}',
+                      '{{ prijava.termin.predmet.naziv|escapejs }}',
+                      '{{ prijava.termin.predmet.godina_studija }}',
+                      '{{ prijava.termin.datum_vrijeme|date:"d.m.Y. H:i" }}',
+                      '{{ prijava.termin.mjesto_izvodjenja|default:"Nije navedeno"|escapejs }}'
+                    )"
+                    class="text-red-600 hover:underline">Odjavi</button>
+                {% else %}
+                  <span class="text-gray-400">Odjavljen</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     {% else %}
-      <p>Trenutno nema prijavljenih ispita.</p>
+      <p class="text-gray-500">Trenutno nema prijavljenih ispita.</p>
     {% endif %}
   </div>
+
 </div>
+
+<script>
+  function otvoriPrijavu(url, naziv, godina, datum, mjesto) {
+    document.getElementById('p-naziv').textContent = naziv;
+    document.getElementById('p-godina').textContent = godina;
+    document.getElementById('p-datum').textContent = datum;
+    document.getElementById('p-mjesto').textContent = mjesto;
+    document.getElementById('p-link').href = url;
+    document.getElementById('dlg-prijava').showModal();
+  }
+
+  function otvoriOdjavu(url, naziv, godina, datum, mjesto) {
+    document.getElementById('o-naziv').textContent = naziv;
+    document.getElementById('o-godina').textContent = godina;
+    document.getElementById('o-datum').textContent = datum;
+    document.getElementById('o-mjesto').textContent = mjesto;
+    document.getElementById('o-link').href = url;
+    document.getElementById('dlg-odjava').showModal();
+  }
+
+  // Klik na backdrop zatvara dialog
+  ['dlg-prijava', 'dlg-odjava'].forEach(id => {
+    document.getElementById(id).addEventListener('click', function(e) {
+      const rect = this.getBoundingClientRect();
+      const clickedOutside = (
+        e.clientX < rect.left || e.clientX > rect.right ||
+        e.clientY < rect.top  || e.clientY > rect.bottom
+      );
+      if (clickedOutside) this.close();
+    });
+  });
+</script>
 {% endblock %}

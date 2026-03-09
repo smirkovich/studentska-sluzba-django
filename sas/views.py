@@ -33,7 +33,9 @@ def ispiti_list(request):
     # samo budući termini
     svi_termini = IspitniTermin.objects.filter(datum_vrijeme__gte=sada).order_by("datum_vrijeme")
 
-    prijavljeni_qs = PrijavaIspita.objects.filter(student=student, status="prijavljen")
+    prijavljeni_qs = PrijavaIspita.objects.filter(
+        student=student, status="prijavljen", termin__datum_vrijeme__gte=sada
+    )
     prijavljeni_ids = prijavljeni_qs.values_list("termin_id", flat=True)
 
     dostupni_termini = svi_termini.exclude(id__in=prijavljeni_ids)
@@ -102,13 +104,15 @@ def prijava_ispita(request, termin_id):
         # Ne postoji nikakav zapis -> pravimo novi
         prijava = PrijavaIspita.objects.create(student=student, termin=termin)
 
-    # Kreiraj novo zaduženje za ovu prijavu
+# Kreiraj novo zaduženje za ovu prijavu
+    datum_str = termin.datum_vrijeme.strftime("%d.%m.%Y")
+    mjesto_str = f", {termin.mjesto_izvodjenja}" if termin.mjesto_izvodjenja else ""
     Zaduzenje.objects.create(
         student=student,
         tip="prijava_ispita",
-        iznos=Decimal("15.00"),
+        iznos=Decimal("20.00"),
         povezano_sa_prijavom=prijava,
-        opis=f"Prijava ispita: {termin.predmet.naziv}",
+        opis=f"Prijava ispita: {termin.predmet.naziv}, {datum_str}{mjesto_str}",
     )
 
     messages.success(request, f"Ispit '{termin.predmet.naziv}' je uspješno prijavljen.")
